@@ -1,7 +1,7 @@
 import { getCustomRepository } from 'typeorm';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
-import AppError from '../errors/AppError';
+import transactionErrors from '../errors/transactionErrors';
 
 interface DeleteTransactionDTO {
   transaction_id: string;
@@ -17,7 +17,7 @@ class DeleteTransactionService {
       where: { id: transaction_id },
     });
 
-    if (!transactionExists) throw new AppError('Transaction not found.', 403);
+    if (!transactionExists) throw transactionErrors.notFound;
 
     await transactionsRepository.delete(transactionExists.id);
   }

@@ -3,7 +3,7 @@ import { getCustomRepository, getRepository } from 'typeorm';
 import TransactionRepository from '../repositories/TransactionsRepository';
 import Transaction from '../models/Transaction';
 import Category from '../models/Category';
-import AppError from '../errors/AppError';
+import transactionErrors from '../errors/transactionErrors';
 
 export interface CreateTransactionDTO {
   title: string;
@@ -20,18 +20,14 @@ class CreateTransactionService {
     category,
   }: CreateTransactionDTO): Promise<Transaction> {
     if (type !== 'income' && type !== 'outcome')
-      throw new AppError(
-        "Transaction type must be either 'income' or 'outcome'",
-        403,
-      );
+      throw transactionErrors.invalidType;
 
     const transactionsRepository = getCustomRepository(TransactionRepository);
 
     if (type === 'outcome') {
       const { total } = await transactionsRepository.getBalance();
 
-      if (value > total)
-        throw new AppError('Transaction value exceeds account total.', 400);
+      if (value > total) throw transactionErrors.exceedsTotal;
     }
 
     const categoriesRepository = getRepository(Category);
